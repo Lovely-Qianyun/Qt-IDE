@@ -1,12 +1,13 @@
 #include "mainwindow.h"
 #include "codeeditor.h"
 #include "ui_mainwindow.h"
+#include<QProcess>
+#include<stdlib.h>
 
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
-{
+    ui(new Ui::MainWindow) {
     ui->setupUi(this);
     //添加代码编辑器
     editor = new CodeEditor(ui->centralWidget);
@@ -21,22 +22,21 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //是否传入了文件路径
     QStringList arguments = QCoreApplication::arguments();
-    if(arguments.length() > 1){
+    if(arguments.length() > 1) {
         fileName = arguments[1];
         this->readFile();
     }
 
 }
 
-MainWindow::~MainWindow()
-{
+MainWindow::~MainWindow() {
     delete ui;
 }
 //初始化一下参数
-void MainWindow::init(){
+void MainWindow::init() {
     this->setWindowTitle("无标题 - idepad");
     this->setWindowIcon(QIcon(":/app.ico"));
-    setting = new QSettings("config.ini",QSettings::IniFormat);
+    setting = new QSettings("config.ini", QSettings::IniFormat);
     //初始化默认值
     autoLine = true;//是否自动换行
     statusBar = true;//是否显示状态栏
@@ -45,8 +45,8 @@ void MainWindow::init(){
     this->setAcceptDrops(true);  //设置窗口接受鼠标放下
 
     setting->beginGroup("config");//beginGroup与下面endGroup 相对应，“config”是标记
-    statusBar = setting->value("status_bar").toInt() == 1?true : false;//获取存储的值
-    autoLine = setting->value("auto_go_line").toInt() == 1?true : false;
+    statusBar = setting->value("status_bar").toInt() == 1 ? true : false; //获取存储的值
+    autoLine = setting->value("auto_go_line").toInt() == 1 ? true : false;
     setting->endGroup();
 
     //设置是否显示状态栏
@@ -55,9 +55,9 @@ void MainWindow::init(){
     ui->actionStatusBar->setIconVisibleInMenu(statusBar);
     //设置Qeditor自动换行
     ui->actionAutoLine->setIconVisibleInMenu(autoLine);
-    if(autoLine){
+    if(autoLine) {
         editor->setLineWrapMode(QPlainTextEdit::WidgetWidth);
-    }else{
+    } else {
         editor->setLineWrapMode(QPlainTextEdit::NoWrap);
     }
     //设置状态栏
@@ -72,45 +72,45 @@ void MainWindow::init(){
 
 }
 //关联信号和槽
-void MainWindow::conn(){
+void MainWindow::conn() {
     //添加处理 文件
-    connect(ui->actionNew,SIGNAL(triggered()),this,SLOT(newFileSolt()));
-    connect(ui->actionExit,SIGNAL(triggered()),this,SLOT(exitAppSlot()));
-    connect(ui->actionOpen,SIGNAL(triggered()),this,SLOT(openFileSlot()));
-    connect(editor,SIGNAL(textChanged()),this,SLOT(textChangeSlot()));
-    connect(ui->actionSave,SIGNAL(triggered()),this,SLOT(saveFileSlot()));
-    connect(ui->actionOtherSave,SIGNAL(triggered()),this,SLOT(saveOtherFileSlot()));
+    connect(ui->actionNew, SIGNAL(triggered()), this, SLOT(newFileSolt()));
+    connect(ui->actionExit, SIGNAL(triggered()), this, SLOT(exitAppSlot()));
+    connect(ui->actionOpen, SIGNAL(triggered()), this, SLOT(openFileSlot()));
+    connect(editor, SIGNAL(textChanged()), this, SLOT(textChangeSlot()));
+    connect(ui->actionSave, SIGNAL(triggered()), this, SLOT(saveFileSlot()));
+    connect(ui->actionOtherSave, SIGNAL(triggered()), this, SLOT(saveOtherFileSlot()));
 
     //添加处理 编辑
-    connect(ui->menuEdit,SIGNAL(aboutToShow()),this,SLOT(editSolt()));
-    connect(ui->actionRedo,SIGNAL(triggered()),this,SLOT(redoSolt()));
-    connect(ui->actionUndo,SIGNAL(triggered()),this,SLOT(undoSolt()));
-    connect(ui->actionCut,SIGNAL(triggered()),this,SLOT(cutSolt()));
-    connect(ui->actionCopy,SIGNAL(triggered()),this,SLOT(copySolt()));
-    connect(ui->actionPaste,SIGNAL(triggered()),this,SLOT(pasteSolt()));
-    connect(ui->actionDelete,SIGNAL(triggered()),this,SLOT(deleteSolt()));
-    connect(ui->actionSelectAll,SIGNAL(triggered()),this,SLOT(selectAllSlot()));
+    connect(ui->menuEdit, SIGNAL(aboutToShow()), this, SLOT(editSolt()));
+    connect(ui->actionRedo, SIGNAL(triggered()), this, SLOT(redoSolt()));
+    connect(ui->actionUndo, SIGNAL(triggered()), this, SLOT(undoSolt()));
+    connect(ui->actionCut, SIGNAL(triggered()), this, SLOT(cutSolt()));
+    connect(ui->actionCopy, SIGNAL(triggered()), this, SLOT(copySolt()));
+    connect(ui->actionPaste, SIGNAL(triggered()), this, SLOT(pasteSolt()));
+    connect(ui->actionDelete, SIGNAL(triggered()), this, SLOT(deleteSolt()));
+    connect(ui->actionSelectAll, SIGNAL(triggered()), this, SLOT(selectAllSlot()));
     //添加处理 视图
-    connect(ui->actionFind,SIGNAL(triggered()),this,SLOT(findSlot()));
-    connect(&findDialog, SIGNAL(find(QString,bool,bool)), this,SLOT(find(QString,bool,bool)));
-    connect(ui->actionReplace,SIGNAL(triggered()),this,SLOT(replaceSlot()));
-    connect(&replaceDialog, SIGNAL(find(QString,bool)), this,SLOT(findForReplaceSlot(QString,bool)));
-    connect(&replaceDialog, SIGNAL(replace(QString,QString,bool,bool)), this,SLOT(doReplaceSlot(QString,QString,bool,bool)));
+    connect(ui->actionFind, SIGNAL(triggered()), this, SLOT(findSlot()));
+    connect(&findDialog, SIGNAL(find(QString, bool, bool)), this, SLOT(find(QString, bool, bool)));
+    connect(ui->actionReplace, SIGNAL(triggered()), this, SLOT(replaceSlot()));
+    connect(&replaceDialog, SIGNAL(find(QString, bool)), this, SLOT(findForReplaceSlot(QString, bool)));
+    connect(&replaceDialog, SIGNAL(replace(QString, QString, bool, bool)), this, SLOT(doReplaceSlot(QString, QString, bool, bool)));
     //格式
-    connect(ui->actionAutoLine,SIGNAL(triggered()),this,SLOT(autoLineSlot()));
-    connect(editor,SIGNAL(cursorPositionChanged()),this,SLOT(cursorChangeSlot()));
+    connect(ui->actionAutoLine, SIGNAL(triggered()), this, SLOT(autoLineSlot()));
+    connect(editor, SIGNAL(cursorPositionChanged()), this, SLOT(cursorChangeSlot()));
     //查看
-    connect(ui->actionStatusBar,SIGNAL(triggered()),this,SLOT(statusBarSlot()));
-    connect(ui->actionZoomIn,SIGNAL(triggered()),this,SLOT(zoomInSlot()));
-    connect(ui->actionZoomOut,SIGNAL(triggered()),this,SLOT(zoomOutSlot()));
+    connect(ui->actionStatusBar, SIGNAL(triggered()), this, SLOT(statusBarSlot()));
+    connect(ui->actionZoomIn, SIGNAL(triggered()), this, SLOT(zoomInSlot()));
+    connect(ui->actionZoomOut, SIGNAL(triggered()), this, SLOT(zoomOutSlot()));
     //帮助
-    connect(ui->actionHelp,SIGNAL(triggered()),this,SLOT(helpSlot()));
+    connect(ui->actionHelp, SIGNAL(triggered()), this, SLOT(helpSlot()));
 
     //工具栏
 
 }
 //设置快捷键
-void MainWindow::setShortcut(){
+void MainWindow::setShortcut() {
     //快捷键
     ui->actionNew->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_N));
     ui->actionOpen->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_O));
@@ -135,36 +135,36 @@ void MainWindow::setShortcut(){
 }
 
 //新建文件槽函数
-void MainWindow::newFileSolt(){
+void MainWindow::newFileSolt() {
     //文档已经修改
-    if(editor->document()->isModified()&& !editor->document()->isEmpty() && fileContent != editor->document()->toPlainText()){
-        QMessageBox box(QMessageBox::Question,"idepad","是否将更改保存到 无标题");
+    if(editor->document()->isModified() && !editor->document()->isEmpty() && fileContent != editor->document()->toPlainText()) {
+        QMessageBox box(QMessageBox::Question, "idepad", "是否将更改保存到 无标题");
         box.setIcon(QMessageBox::NoIcon);
-        box.setStandardButtons (QMessageBox::Ok|QMessageBox::Ignore|QMessageBox::Cancel);
-        box.setButtonText (QMessageBox::Ok,QString("保存"));
-        box.setButtonText (QMessageBox::Ignore,QString("不保存"));
-        box.setButtonText (QMessageBox::Cancel,QString("取消"));
+        box.setStandardButtons (QMessageBox::Ok | QMessageBox::Ignore | QMessageBox::Cancel);
+        box.setButtonText (QMessageBox::Ok, QString("保存"));
+        box.setButtonText (QMessageBox::Ignore, QString("不保存"));
+        box.setButtonText (QMessageBox::Cancel, QString("取消"));
         int result = box.exec();
-        if(result == QMessageBox::Ok){
-            if(fileName.isEmpty()){//新建
+        if(result == QMessageBox::Ok) {
+            if(fileName.isEmpty()) { //新建
                 //弹出保存文件对话框
-                fileName = QFileDialog::getSaveFileName(this, tr("保存文件"),QDir::homePath(),tr("c files (*.c);;cpp files (*.cpp);;any files (*.*)"));
-                if(!fileName.isEmpty()){
+                fileName = QFileDialog::getSaveFileName(this, tr("保存文件"), QDir::homePath(), tr("c files (*.c);;cpp files (*.cpp);;any files (*.*)"));
+                if(!fileName.isEmpty()) {
                     //保存文件
                     this->saveTextToFile();
                 }
-            }else{//读取的文本
+            } else { //读取的文本
                 this->saveTextToFile();
             }
             editor->clear();
             setWindowTitle("无标题 - idepad");
-        }else  if(result == QMessageBox::Ignore){
+        } else  if(result == QMessageBox::Ignore) {
             //不保存
             editor->clear();
             setWindowTitle("无标题 - idepad");
             ui->statusBar->showMessage("");
         }
-    }else{
+    } else {
         //文档未修改
         editor->clear();
         setWindowTitle("无标题 - idepad");
@@ -174,113 +174,113 @@ void MainWindow::newFileSolt(){
 }
 
 //退出应用槽函数
-void MainWindow::exitAppSlot(){
+void MainWindow::exitAppSlot() {
     //文档已经修改
-    if(editor->document()->isModified()&& !editor->document()->isEmpty() && fileContent != editor->document()->toPlainText()){
-        QMessageBox box(QMessageBox::Question,"idepad","是否将更改保存到 无标题");
+    if(editor->document()->isModified() && !editor->document()->isEmpty() && fileContent != editor->document()->toPlainText()) {
+        QMessageBox box(QMessageBox::Question, "idepad", "是否将更改保存到 无标题");
         box.setIcon(QMessageBox::NoIcon);
-        box.setStandardButtons (QMessageBox::Ok|QMessageBox::Ignore|QMessageBox::Cancel);
-        box.setButtonText (QMessageBox::Ok,QString("保存"));
-        box.setButtonText (QMessageBox::Ignore,QString("不保存"));
-        box.setButtonText (QMessageBox::Cancel,QString("取消"));
+        box.setStandardButtons (QMessageBox::Ok | QMessageBox::Ignore | QMessageBox::Cancel);
+        box.setButtonText (QMessageBox::Ok, QString("保存"));
+        box.setButtonText (QMessageBox::Ignore, QString("不保存"));
+        box.setButtonText (QMessageBox::Cancel, QString("取消"));
         int result = box.exec();
-        if(result == QMessageBox::Ok){
-            if(fileName.isEmpty()){//新建
+        if(result == QMessageBox::Ok) {
+            if(fileName.isEmpty()) { //新建
                 //弹出保存文件对话框
-                fileName = QFileDialog::getSaveFileName(this, tr("保存文件"),QDir::homePath(),tr("c files (*.c);;cpp files (*.cpp);;any files (*.*)"));
-                if(!fileName.isEmpty()){
+                fileName = QFileDialog::getSaveFileName(this, tr("保存文件"), QDir::homePath(), tr("c files (*.c);;cpp files (*.cpp);;any files (*.*)"));
+                if(!fileName.isEmpty()) {
                     //保存文件
                     this->saveTextToFile();
                 }
-            }else{//读取的文本
+            } else { //读取的文本
                 this->saveTextToFile();
             }
 
-        }else  if(result == QMessageBox::Ignore){
+        } else  if(result == QMessageBox::Ignore) {
             //不保存 关闭
             this->close();
         }
-    }else{
+    } else {
         this->close();
     }
 }
 //另存文件槽函数
-void MainWindow::saveOtherFileSlot(){
+void MainWindow::saveOtherFileSlot() {
     //弹出保存文件对话框
-    fileName = QFileDialog::getSaveFileName(this, tr("保存文件"),QDir::homePath(),tr("c files (*.c);;cpp files (*.cpp);;any files (*.*)"));
-    if(!fileName.isEmpty()){
+    fileName = QFileDialog::getSaveFileName(this, tr("保存文件"), QDir::homePath(), tr("c files (*.c);;cpp files (*.cpp);;any files (*.*)"));
+    if(!fileName.isEmpty()) {
         //保存文件
         this->saveTextToFile();
     }
 }
 //保存文件槽函数
-void MainWindow::saveFileSlot(){
+void MainWindow::saveFileSlot() {
     //判断是新建还是读取的文本
-    if(fileName.isEmpty()){//新建
+    if(fileName.isEmpty()) { //新建
         //弹出保存文件对话框
-        fileName = QFileDialog::getSaveFileName(this, tr("保存文件"),QDir::homePath(),tr("c files (*.c);;cpp files (*.cpp);;any files (*.*)"));
-        if(!fileName.isEmpty()){
+        fileName = QFileDialog::getSaveFileName(this, tr("保存文件"), QDir::homePath(), tr("c files (*.c);;cpp files (*.cpp);;any files (*.*)"));
+        if(!fileName.isEmpty()) {
             //保存文件
             this->saveTextToFile();
         }
-    }else{//读取的文本
+    } else { //读取的文本
         this->saveTextToFile();
     }
 }
 //保存文件
-void MainWindow::saveTextToFile(){
+void MainWindow::saveTextToFile() {
     QFile file(fileName);
-    if (file.open(QIODevice::WriteOnly)){
+    if (file.open(QIODevice::WriteOnly)) {
         QTextStream out(&file);
         out << editor->document()->toPlainText();
         file.close();
-        this->setWindowTitle(fileName.mid(fileName.lastIndexOf('/')+1)+" - idepad");
+        this->setWindowTitle(fileName.mid(fileName.lastIndexOf('/') + 1) + " - idepad");
         fileContent = editor->document()->toPlainText();
-        ui->statusBar->showMessage("已保存",3000);
-    }else{
-        QMessageBox box(QMessageBox::Question,"提示","保存文件失败！");
+        ui->statusBar->showMessage("已保存", 3000);
+    } else {
+        QMessageBox box(QMessageBox::Question, "提示", "保存文件失败！");
         box.setIcon(QMessageBox::Warning);
         box.setStandardButtons (QMessageBox::Ok);
-        box.setButtonText (QMessageBox::Ok,QString("确定"));
+        box.setButtonText (QMessageBox::Ok, QString("确定"));
         box.exec();
     }
 
 }
 //打开文件槽函数
-void MainWindow::openFileSlot(){
+void MainWindow::openFileSlot() {
     //文档已经修改
-    if(editor->document()->isModified() && !editor->document()->isEmpty() && fileContent != editor->document()->toPlainText()){
-        QMessageBox box(QMessageBox::Question,"idepad","是否将更改保存到 无标题");
+    if(editor->document()->isModified() && !editor->document()->isEmpty() && fileContent != editor->document()->toPlainText()) {
+        QMessageBox box(QMessageBox::Question, "idepad", "是否将更改保存到 无标题");
         box.setIcon(QMessageBox::NoIcon);
-        box.setStandardButtons (QMessageBox::Ok|QMessageBox::Ignore|QMessageBox::Cancel);
-        box.setButtonText (QMessageBox::Ok,QString("保存"));
-        box.setButtonText (QMessageBox::Ignore,QString("不保存"));
-        box.setButtonText (QMessageBox::Cancel,QString("取消"));
+        box.setStandardButtons (QMessageBox::Ok | QMessageBox::Ignore | QMessageBox::Cancel);
+        box.setButtonText (QMessageBox::Ok, QString("保存"));
+        box.setButtonText (QMessageBox::Ignore, QString("不保存"));
+        box.setButtonText (QMessageBox::Cancel, QString("取消"));
         int result = box.exec();
-        if(result == QMessageBox::Ok){
+        if(result == QMessageBox::Ok) {
             //保存文件
             this->saveTextToFile();
-        }else  if(result == QMessageBox::Ignore){
+        } else  if(result == QMessageBox::Ignore) {
             //不保存
             //打开文件
-            fileName = QFileDialog::getOpenFileName(this, tr("打开文件"),QDir::homePath(),tr("c files (*.c);;cpp files (*.cpp);;any files (*.*)"));
+            fileName = QFileDialog::getOpenFileName(this, tr("打开文件"), QDir::homePath(), tr("c files (*.c);;cpp files (*.cpp);;any files (*.*)"));
             this->readFile();
         }
-    }else{
-        fileName = QFileDialog::getOpenFileName(this, tr("打开文件"),QDir::homePath(),tr("c files (*.c);;cpp files (*.cpp);;any files (*.*)"));
+    } else {
+        fileName = QFileDialog::getOpenFileName(this, tr("打开文件"), QDir::homePath(), tr("c files (*.c);;cpp files (*.cpp);;any files (*.*)"));
         this->readFile();
     }
 }
 //真正打开文件
-void MainWindow::readFile(){
+void MainWindow::readFile() {
 
     //得到路径不为空
-    if(!fileName.isEmpty()){
+    if(!fileName.isEmpty()) {
         QFile *file = new QFile;
         file->setFileName(fileName);
 
         bool isOpen = file->open(QIODevice::ReadOnly);
-        if(isOpen){
+        if(isOpen) {
             editor->clear();
             QTextStream in(file);
 
@@ -292,55 +292,58 @@ void MainWindow::readFile(){
             //已读完
             fileContent = editor->document()->toPlainText();
 
-            if(fileName.lastIndexOf("\\") != -1){
+            if(fileName.lastIndexOf("\\") != -1) {
                 //设置标题
-                this->setWindowTitle(fileName.mid(fileName.lastIndexOf('\\')+1)+" - idepad");
-            }else{
+                this->setWindowTitle(fileName.mid(fileName.lastIndexOf('\\') + 1) + " - idepad");
+            } else {
                 //设置标题
-                this->setWindowTitle(fileName.mid(fileName.lastIndexOf('/')+1)+" - idepad");
+                this->setWindowTitle(fileName.mid(fileName.lastIndexOf('/') + 1) + " - idepad");
             }
 
             file->close();
             ui->statusBar->showMessage("");
-        }else{
-            QMessageBox box(QMessageBox::Question,"提示","打开文件失败！");
+        } else {
+            QMessageBox box(QMessageBox::Question, "提示", "打开文件失败！");
             box.setIcon(QMessageBox::Warning);
             box.setStandardButtons (QMessageBox::Ok);
-            box.setButtonText (QMessageBox::Ok,QString("确定"));
+            box.setButtonText (QMessageBox::Ok, QString("确定"));
             box.exec();
         }
     }
 }
 //文本 变化槽函数
-void MainWindow::textChangeSlot(){
+void MainWindow::textChangeSlot() {
     ui->statusBar->showMessage("");
-    if(editor->document()->isEmpty()){
-        if(fileName.isEmpty()){//没有保存到文件
+    if(editor->document()->isEmpty()) {
+        if(fileName.isEmpty()) { //没有保存到文件
             this->setWindowTitle("无标题 - idepad");
 
-        }else{//有文件
-            this->setWindowTitle(fileName.mid(fileName.lastIndexOf('/')+1)+" - idepad *");
-            if( fileContent != editor->document()->toPlainText())
+        } else { //有文件
+            this->setWindowTitle(fileName.mid(fileName.lastIndexOf('/') + 1) + " - idepad *");
+            if( fileContent != editor->document()->toPlainText()) {
                 ui->statusBar->showMessage("未保存");
+            }
         }
-    }else if(editor->document()->isModified()){
-        if(fileName.isEmpty()){//没有保存到文件
+    } else if(editor->document()->isModified()) {
+        if(fileName.isEmpty()) { //没有保存到文件
             this->setWindowTitle("无标题 - idepad *");
-            if( fileContent != editor->document()->toPlainText())
+            if( fileContent != editor->document()->toPlainText()) {
                 ui->statusBar->showMessage("未保存");
-        }else{//有文件
-            this->setWindowTitle(fileName.mid(fileName.lastIndexOf('/')+1)+" - idepad *");
-            if( fileContent != editor->document()->toPlainText())
+            }
+        } else { //有文件
+            this->setWindowTitle(fileName.mid(fileName.lastIndexOf('/') + 1) + " - idepad *");
+            if( fileContent != editor->document()->toPlainText()) {
                 ui->statusBar->showMessage("未保存");
+            }
         }
-        if(fileContent == editor->document()->toPlainText()){
-            this->setWindowTitle(fileName.mid(fileName.lastIndexOf('/')+1)+" - idepad");
+        if(fileContent == editor->document()->toPlainText()) {
+            this->setWindowTitle(fileName.mid(fileName.lastIndexOf('/') + 1) + " - idepad");
         }
     }
-    if(editor->document()->isEmpty()){
+    if(editor->document()->isEmpty()) {
         ui->actionFind->setEnabled(false);
         ui->actionFindNext->setEnabled(false);
-    }else{
+    } else {
         ui->actionFind->setEnabled(true);
         ui->actionFindNext->setEnabled(true);
     }
@@ -349,16 +352,15 @@ void MainWindow::textChangeSlot(){
 }
 
 // 撤销槽函数
-void MainWindow::editSolt()
-{
-    QTextCursor cursor= editor->textCursor();
-    if(cursor.hasSelection()){
+void MainWindow::editSolt() {
+    QTextCursor cursor = editor->textCursor();
+    if(cursor.hasSelection()) {
         //剪切复制删除可用
         ui->actionCut->setEnabled(true);
         ui->actionCopy->setEnabled(true);
         ui->actionDelete->setEnabled(true);
 
-    }else{
+    } else {
         //剪切复制删除不可用
         ui->actionCut->setEnabled(false);
         ui->actionCopy->setEnabled(false);
@@ -367,243 +369,270 @@ void MainWindow::editSolt()
     }
 }
 // 撤销槽函数
-void MainWindow::undoSolt()
-{
+void MainWindow::undoSolt() {
     editor->undo();
 }
 //重做
-void MainWindow::redoSolt()
-{
+void MainWindow::redoSolt() {
     editor->redo();
 }
 //剪切
-void MainWindow::cutSolt()
-{
+void MainWindow::cutSolt() {
     editor->cut();
 }
 //复制
-void MainWindow::copySolt()
-{
+void MainWindow::copySolt() {
     editor->copy();
 }
 //粘贴
-void MainWindow::pasteSolt()
-{
+void MainWindow::pasteSolt() {
     editor->paste();
 }
 //删除
-void MainWindow::deleteSolt()
-{
-    QTextCursor cursor= editor->textCursor();
-    if(cursor.hasSelection()){
+void MainWindow::deleteSolt() {
+    QTextCursor cursor = editor->textCursor();
+    if(cursor.hasSelection()) {
         cursor.deleteChar();
     }
 }
 //全选
-void MainWindow::selectAllSlot()
-{
+void MainWindow::selectAllSlot() {
     editor->selectAll();
 }
 //自动换行
-void MainWindow::autoLineSlot(){
-    if(autoLine){
+void MainWindow::autoLineSlot() {
+    if(autoLine) {
         editor->setLineWrapMode(QPlainTextEdit::NoWrap);
         autoLine = false;
 
-    }else{
+    } else {
         editor->setLineWrapMode(QPlainTextEdit::WidgetWidth);
         autoLine = true;
     }
     ui->actionAutoLine->setIconVisibleInMenu(autoLine);
 
     setting->beginGroup("config");//beginGroup与下面endGroup 相对应，“config”是标记
-    setting->setValue("auto_go_line",QVariant(autoLine?"1":"0"));
+    setting->setValue("auto_go_line", QVariant(autoLine ? "1" : "0"));
     setting->endGroup();
 }
 //光标变化
-void MainWindow::cursorChangeSlot(){
+void MainWindow::cursorChangeSlot() {
     QTextCursor cursor = editor->textCursor();
-    int column = cursor.columnNumber()+1;
-    int block = cursor.blockNumber()+1;
-    change->setText("第 "+QString::number(block)+" 行，第 "+QString::number(column)+" 列 s");
+    int column = cursor.columnNumber() + 1;
+    int block = cursor.blockNumber() + 1;
+    change->setText("第 " + QString::number(block) + " 行，第 " + QString::number(column) + " 列 s");
 }
 //状态栏
-void MainWindow::statusBarSlot(){
+void MainWindow::statusBarSlot() {
     statusBar = !statusBar;
     ui->actionStatusBar->setIconVisibleInMenu(statusBar);
     ui->statusBar->setVisible(statusBar);
 
     setting->beginGroup("config");//beginGroup与下面endGroup 相对应，“config”是标记
-    setting->setValue("status_bar",QVariant(statusBar?"1":"0"));
+    setting->setValue("status_bar", QVariant(statusBar ? "1" : "0"));
     setting->endGroup();
 }
 
 //帮助
-void MainWindow::helpSlot(){
+void MainWindow::helpSlot() {
     //todo
 }
 //查找槽函数
-void MainWindow::findSlot(){
+void MainWindow::findSlot() {
     editor->moveCursor(QTextCursor::Start);
     findDialog.exec();
 }
 //查找
-void MainWindow::find(QString value,bool isChecked,bool isUp){
-    if(isUp){
-        if(!isChecked){
-            if(!editor->find(value,QTextDocument::FindBackward)){
-                showMessage("找不到\""+value+"\"");
+void MainWindow::find(QString value, bool isChecked, bool isUp) {
+    if(isUp) {
+        if(!isChecked) {
+            if(!editor->find(value, QTextDocument::FindBackward)) {
+                showMessage("找不到\"" + value + "\"");
             }
-        }else{
-            if(!editor->find(value,QTextDocument::FindBackward|QTextDocument::FindCaseSensitively)){
-                showMessage("找不到\""+value+"\"");
+        } else {
+            if(!editor->find(value, QTextDocument::FindBackward | QTextDocument::FindCaseSensitively)) {
+                showMessage("找不到\"" + value + "\"");
             }
         }
-    }else{
-        if(!isChecked){
-            if(!editor->find(value)){
-                showMessage("找不到\""+value+"\"");
+    } else {
+        if(!isChecked) {
+            if(!editor->find(value)) {
+                showMessage("找不到\"" + value + "\"");
             }
-        }else{
-            if(!editor->find(value,QTextDocument::FindCaseSensitively)){
-                showMessage("找不到\""+value+"\"");
+        } else {
+            if(!editor->find(value, QTextDocument::FindCaseSensitively)) {
+                showMessage("找不到\"" + value + "\"");
             }
         }
     }
     QPalette palette =  editor->palette();
-    palette.setColor(QPalette::Highlight,palette.color(QPalette::Active,QPalette::Highlight));
+    palette.setColor(QPalette::Highlight, palette.color(QPalette::Active, QPalette::Highlight));
     editor->setPalette(palette);
 }
 //替换
-void MainWindow::replaceSlot(){
+void MainWindow::replaceSlot() {
     isFirstFind = true;
     replaceDialog.exec();
 }
 //进行替换
-void MainWindow::replace(QString value, bool isChecked)
-{
+void MainWindow::replace(QString value, bool isChecked) {
     QTextCursor cursor = editor->textCursor();
     //替换单个值
     cursor.insertText(value);
     //光标移动到前一位
     editor->moveCursor(cursor.PreviousCharacter);
     //是否区分大小写 查找替换后的值高亮
-    if(!isChecked){
+    if(!isChecked) {
         editor->find(value);
-    }else{
-        editor->find(value,QTextDocument::FindCaseSensitively);
+    } else {
+        editor->find(value, QTextDocument::FindCaseSensitively);
     }
 }
 
-void MainWindow::doReplaceSlot(QString target,QString value,bool isChecked,bool isReplaceAll){
-    if(isFirstFind){
+void MainWindow::doReplaceSlot(QString target, QString value, bool isChecked, bool isReplaceAll) {
+    if(isFirstFind) {
         editor->moveCursor(QTextCursor::Start);
         isFirstFind = false;
     }
-    if(!isChecked){
-        if(!editor->find(target)){
-            showMessage("找不到\""+target+"\"");
+    if(!isChecked) {
+        if(!editor->find(target)) {
+            showMessage("找不到\"" + target + "\"");
             return;
         }
-    }else{
-        if(!editor->find(target,QTextDocument::FindCaseSensitively)){
-            showMessage("找不到\""+target+"\"");
+    } else {
+        if(!editor->find(target, QTextDocument::FindCaseSensitively)) {
+            showMessage("找不到\"" + target + "\"");
             return;
         }
     }
     //选中高亮
     QPalette palette =  editor->palette();
-    palette.setColor(QPalette::Highlight,palette.color(QPalette::Active,QPalette::Highlight));
+    palette.setColor(QPalette::Highlight, palette.color(QPalette::Active, QPalette::Highlight));
     editor->setPalette(palette);
     //替换
-    if(isReplaceAll){
-        if(!editor->textCursor().atEnd()){
-            replace(value,isChecked);
-            doReplaceSlot(target,value,isChecked,isReplaceAll);
+    if(isReplaceAll) {
+        if(!editor->textCursor().atEnd()) {
+            replace(value, isChecked);
+            doReplaceSlot(target, value, isChecked, isReplaceAll);
         }
-    }else{
+    } else {
         replace(value, isChecked);
     }
 }
 //查找
-void MainWindow::findForReplaceSlot(QString value,bool isChecked){
-    if(isFirstFind){
+void MainWindow::findForReplaceSlot(QString value, bool isChecked) {
+    if(isFirstFind) {
         editor->moveCursor(QTextCursor::Start);
         isFirstFind = false;
     }
 
-    this->find(value,isChecked,false);
+    this->find(value, isChecked, false);
 }
-void MainWindow::showMessage(QString title){
-    QMessageBox box(QMessageBox::Question,"idepad - 查找",title);
+void MainWindow::showMessage(QString title) {
+    QMessageBox box(QMessageBox::Question, "idepad - 查找", title);
     box.setIcon(QMessageBox::NoIcon);
     box.setStandardButtons (QMessageBox::Ok);
-    box.setButtonText (QMessageBox::Ok,QString("确定"));
+    box.setButtonText (QMessageBox::Ok, QString("确定"));
     box.setWindowFlags( Qt::WindowCloseButtonHint | Qt::WindowStaysOnTopHint );
     box.exec();
 }
 
 //关闭事件
-void MainWindow::closeEvent(QCloseEvent *event){
+void MainWindow::closeEvent(QCloseEvent *event) {
     //文档已经修改
-    if(editor->document()->isModified() && !editor->document()->isEmpty() && fileContent != editor->document()->toPlainText()){
-        QMessageBox box(QMessageBox::Question,"idepad","是否将更改保存到 无标题");
+    if(editor->document()->isModified() && !editor->document()->isEmpty() && fileContent != editor->document()->toPlainText()) {
+        QMessageBox box(QMessageBox::Question, "idepad", "是否将更改保存到 无标题");
         box.setIcon(QMessageBox::NoIcon);
-        box.setStandardButtons (QMessageBox::Ok|QMessageBox::Ignore|QMessageBox::Cancel);
-        box.setButtonText (QMessageBox::Ok,QString("保存"));
-        box.setButtonText (QMessageBox::Ignore,QString("不保存"));
-        box.setButtonText (QMessageBox::Cancel,QString("取消"));
+        box.setStandardButtons (QMessageBox::Ok | QMessageBox::Ignore | QMessageBox::Cancel);
+        box.setButtonText (QMessageBox::Ok, QString("保存"));
+        box.setButtonText (QMessageBox::Ignore, QString("不保存"));
+        box.setButtonText (QMessageBox::Cancel, QString("取消"));
         int result = box.exec();
-        if(result == QMessageBox::Ok){
+        if(result == QMessageBox::Ok) {
             //保存文件
-            if(fileName.isEmpty()){//新建
+            if(fileName.isEmpty()) { //新建
                 //弹出保存文件对话框
-                fileName = QFileDialog::getSaveFileName(this, tr("保存文件"),QDir::homePath(),tr("c files (*.c);;cpp files (*.cpp);;any files (*.*)"));
-                if(!fileName.isEmpty()){
+                fileName = QFileDialog::getSaveFileName(this, tr("保存文件"), QDir::homePath(), tr("c files (*.c);;cpp files (*.cpp);;any files (*.*)"));
+                if(!fileName.isEmpty()) {
                     //保存文件
                     this->saveTextToFile();
                 }
-            }else{//读取的文本
+            } else { //读取的文本
                 this->saveTextToFile();
             }
-             event->accept();
-        }else  if(result == QMessageBox::Ignore){
-             event->accept();
-        }else{
+            event->accept();
+        } else  if(result == QMessageBox::Ignore) {
+            event->accept();
+        } else {
             event->ignore();
         }
-    }else{
+    } else {
         event->accept();
     }
 }
 //放大
-void MainWindow::zoomInSlot(){
+void MainWindow::zoomInSlot() {
     zoomInNum++;
-    if(zoomInNum <= 15){ //最大放大次数为15
+    if(zoomInNum <= 15) { //最大放大次数为15
         editor->zoomIn(2);//参数为2缩放比例正常
     }
 }
 //缩小
-void MainWindow::zoomOutSlot(){
+void MainWindow::zoomOutSlot() {
     zoomInNum--;
-    if(zoomInNum >= -2){ //最大缩小次数为3
+    if(zoomInNum >= -2) { //最大缩小次数为3
         editor->zoomIn(-2);
     }
 }
 
 //连接编译器相关
 //编译运行
-void MainWindow::compileRunSlot(){
-    //todo
+void MainWindow::compileRunSlot() {
+    qDebug() << "compile";
+    if(editor->document()->isModified() && !editor->document()->isEmpty() && fileContent != editor->document()->toPlainText()) {
+        QMessageBox box(QMessageBox::Question, "idepad", "是否将更改保存到 无标题");
+        box.setIcon(QMessageBox::NoIcon);
+        box.setStandardButtons (QMessageBox::Ok | QMessageBox::Ignore | QMessageBox::Cancel);
+        box.setButtonText (QMessageBox::Ok, QString("保存"));
+        box.setButtonText (QMessageBox::Ignore, QString("不保存"));
+        box.setButtonText (QMessageBox::Cancel, QString("取消"));
+        int result = box.exec();
+        if(result == QMessageBox::Ok) {
+            //保存文件
+            if(fileName.isEmpty()) { //新建
+                //弹出保存文件对话框
+                fileName = QFileDialog::getSaveFileName(this, tr("保存文件"), QDir::homePath(), tr("c files (*.c);;cpp files (*.cpp);;any files (*.*)"));
+                if(!fileName.isEmpty()) {
+                    //保存文件
+                    this->saveTextToFile();
+                }
+            } else { //读取的文本
+                this->saveTextToFile();
+            }
+            QProcess *p = new QProcess;
+            p->setProgram("cmd");
+            QStringList args;
+            args << "/c" << "g++" << fileName << fileName.mid(0, fileName.lastIndexOf(".")) + ".exe";
+            p->setArguments(args);
+            p->start();
+            p->waitForStarted();
+            p->waitForFinished();
+            p->setProgram("ConsolePauser.exe");
+            args << fileName.mid(0, fileName.lastIndexOf(".")) + ".exe";
+            p->setArguments(args);
+            p->start();
+            p->waitForStarted();
+            p->waitForFinished();
+        }
+    }
 }
-
 //运行
-void MainWindow::runSlot(){
+void MainWindow::runSlot() {
     //todo
 }
 
 //编译
-void MainWindow::compileSlot(){
+void MainWindow::compileSlot() {
     //todo
 }
 

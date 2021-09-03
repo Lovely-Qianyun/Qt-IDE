@@ -41,7 +41,6 @@ FORMS += \
     finddialog.ui \
     replacedialog.ui
 
-RC_FILE = app.rc
 
 RESOURCES += \
     images.qrc \
