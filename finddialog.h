@@ -4,8 +4,9 @@
 #include <QDialog>
 #include <QMessageBox>
 
-namespace Ui {
-class FindDialog;
+namespace Ui
+{
+    class FindDialog;
 }
 
 class FindDialog : public QDialog
@@ -16,7 +17,7 @@ public:
     explicit FindDialog(QWidget *parent = 0);
     ~FindDialog();
 signals:
-    void find(QString,bool,bool);
+    void find(QString, bool, bool);
 private slots:
     void on_pushButton_2_clicked();
 

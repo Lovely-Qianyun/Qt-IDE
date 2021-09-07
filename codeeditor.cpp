@@ -1,9 +1,9 @@
 #include "codeeditor.h"
-
+#include "qmytextedit.h"
 #include <QPainter>
 #include <QTextBlock>
 
-CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent)
+CodeEditor::CodeEditor(QWidget *parent) : QMyTextEdit(parent)
 {
     lineNumberArea = new LineNumberArea(this);
 
@@ -50,7 +50,8 @@ void CodeEditor::highlightCurrentLine()
 {
     QList<QTextEdit::ExtraSelection> extraSelections;
 
-    if (!isReadOnly()) {
+    if (!isReadOnly())
+    {
         QTextEdit::ExtraSelection selection;
 
         QColor lineColor = QColor(Qt::yellow).lighter(160);
@@ -78,8 +79,10 @@ void CodeEditor::lineNumberAreaPaintEvent(QPaintEvent *event)
     int bottom = top + qRound(blockBoundingRect(block).height());
 
     //extraAreaPaintEvent_2
-    while (block.isValid() && top <= event->rect().bottom()) {
-        if (block.isVisible() && bottom >= event->rect().top()) {
+    while (block.isValid() && top <= event->rect().bottom())
+    {
+        if (block.isVisible() && bottom >= event->rect().top())
+        {
             QString number = QString::number(blockNumber + 1);
             painter.setPen(Qt::black);
             painter.drawText(0, top, lineNumberArea->width(), fontMetrics().height(),
@@ -92,4 +95,3 @@ void CodeEditor::lineNumberAreaPaintEvent(QPaintEvent *event)
         ++blockNumber;
     }
 }
-

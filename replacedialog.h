@@ -4,8 +4,9 @@
 #include <QDialog>
 #include <QMessageBox>
 
-namespace Ui {
-class ReplaceDialog;
+namespace Ui
+{
+    class ReplaceDialog;
 }
 
 class ReplaceDialog : public QDialog
@@ -16,8 +17,8 @@ public:
     explicit ReplaceDialog(QWidget *parent = 0);
     ~ReplaceDialog();
 signals:
-    void find(QString,bool);
-    void replace(QString,QString,bool,bool);
+    void find(QString, bool);
+    void replace(QString, QString, bool, bool);
 private slots:
     void on_cancelButton_clicked();
     //文本改变
@@ -30,7 +31,6 @@ private slots:
 
 private:
     Ui::ReplaceDialog *ui;
-
 };
 
 #endif // REPLACEDIALOG_H
