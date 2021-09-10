@@ -3,6 +3,7 @@
 
 QMyTextEdit::QMyTextEdit(QWidget *parent) : QPlainTextEdit(parent)
 {
+
 }
 //括号补全
 void QMyTextEdit::keyReleaseEvent(QKeyEvent *event)
@@ -78,7 +79,7 @@ void QMyTextEdit::mouseReleaseEvent(QMouseEvent *event)
 {
     QTextCursor cursor = this->textCursor();
     s = cursor.selectedText();
-    qDebug() << s;
+//    qDebug() << s;
 }
 
 void QMyTextEdit::reInit()

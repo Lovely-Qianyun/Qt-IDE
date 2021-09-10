@@ -1,5 +1,6 @@
 #ifndef CODEEDITOR_H
 #define CODEEDITOR_H
+#include "qmytextedit.h"
 #include <QCompleter>
 #include <QPlainTextEdit>
 
@@ -12,7 +13,7 @@ QT_END_NAMESPACE
 
 class LineNumberArea;
 
-class CodeEditor : public QPlainTextEdit
+class CodeEditor : public QMyTextEdit
 {
     Q_OBJECT
 
@@ -22,9 +23,10 @@ public:
     void updatecompleter();
     QStringList stringList;
     CodeEditor(QWidget *parent = nullptr);
-
     void lineNumberAreaPaintEvent(QPaintEvent *event);
     int lineNumberAreaWidth();
+    int blockNumber;
+    QCompleter *m_completer;
 
 protected:
     void resizeEvent(QResizeEvent *event) override;
@@ -37,7 +39,6 @@ private slots:
     void onCompleterActivated(const QString &completion); // 响应选中QCompleter中的选项后，QCompleter发出的activated()信号
 
 private:
-    QCompleter *m_completer;
     QWidget *lineNumberArea;
     QString wordUnderCursor(); // 获取当前光标所在的单词
 };

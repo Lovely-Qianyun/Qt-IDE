@@ -23,7 +23,7 @@ CodeEditor::CodeEditor(QWidget *parent) : QMyTextEdit(parent)
 
 int CodeEditor::lineNumberAreaWidth()
 {
-    int space = 80;
+    int space = 50;
     return space;
 }
 
@@ -80,7 +80,7 @@ void CodeEditor::lineNumberAreaPaintEvent(QPaintEvent *event)
 
     //extraAreaPaintEvent_1
     QTextBlock block = firstVisibleBlock();
-    int blockNumber = block.blockNumber();
+    blockNumber = block.blockNumber();
     int top = qRound(blockBoundingGeometry(block).translated(contentOffset()).top());
     int bottom = top + qRound(blockBoundingRect(block).height());
 
@@ -91,8 +91,7 @@ void CodeEditor::lineNumberAreaPaintEvent(QPaintEvent *event)
         {
             QString number = QString::number(blockNumber + 1);
             painter.setPen(Qt::black);
-            painter.drawText(0, top, lineNumberArea->width(), fontMetrics().height(),
-                             Qt::AlignRight, number);
+            painter.drawText(0, top, lineNumberArea->width(), fontMetrics().height(), Qt::AlignRight, number);
         }
 
         block = block.next();
@@ -126,11 +125,11 @@ void CodeEditor::keyPressEvent(QKeyEvent *e)
             case Qt::Key_Enter:
             case Qt::Key_Return:
             case Qt::Key_Tab:
-                qDebug() << '1' << e->key();
+//                qDebug() << '1' << e->key();
                 e->ignore();
                 return;
             default:
-                qDebug() << '2' << e->key();
+//                qDebug() << '2' << e->key();
                 break;
             }
         }
@@ -226,6 +225,8 @@ void CodeEditor::initcompleter()
                << "for"
                << "goto"
                << "if"
+               << "main"
+               << "include"
                << "int"
                << "long"
                << "register"
@@ -240,6 +241,8 @@ void CodeEditor::initcompleter()
                << "union"
                << "unsigned"
                << "void"
+               << "printf"
+               << "scanf"
                << "volatile"
                << "while";
     QCompleter *completer = new QCompleter(stringList, this);

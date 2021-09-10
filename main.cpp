@@ -19,9 +19,6 @@ int main(int argc, char *argv[])
     setting.endGroup();
 
     MainWindow w;
-    QDesktopWidget *desktop = QApplication::desktop();
-    //居中显示
-    w.move((desktop->width() - w.width()) / 2, (desktop->height() - w.height()) / 2);
     w.show();
     return a.exec();
 }

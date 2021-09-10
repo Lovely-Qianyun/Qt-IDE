@@ -3,6 +3,7 @@
 #include "ui_mainwindow.h"
 #include <QProcess>
 #include <stdlib.h>
+#include <QTextDocument>
 #include <color.h>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
@@ -41,21 +42,26 @@ void MainWindow::init()
     this->setWindowIcon(QIcon(":/app.ico"));
     setting = new QSettings("config.ini", QSettings::IniFormat);
     //初始化默认值
-    autoLine = true;               //是否自动换行
-    statusBar = true;              //是否显示状态栏
+    autoLine = true; //是否自动换行
+    //***
+    statusBar = true; //是否显示状态栏
+    //**
     isFirstFind = true;            //是否第一次搜索 替换时用
     editor->setAcceptDrops(false); //设置文本输入框不接受鼠标放下
     this->setAcceptDrops(true);    //设置窗口接受鼠标放下
 
-    setting->beginGroup("config");                                        //beginGroup与下面endGroup 相对应，“config”是标记
+    setting->beginGroup("config"); //beginGroup与下面endGroup 相对应，“config”是标记
+    //***
     statusBar = setting->value("status_bar").toInt() == 1 ? true : false; //获取存储的值
+    //**
     autoLine = setting->value("auto_go_line").toInt() == 1 ? true : false;
     setting->endGroup();
-
+    //***
     //设置是否显示状态栏
-    ui->statusBar->setVisible(statusBar);
+    ui->statusBar->setVisible(false);
     //是否显示显示状态栏勾中图标
     ui->actionStatusBar->setIconVisibleInMenu(statusBar);
+    //**
     //设置Qeditor自动换行
     ui->actionAutoLine->setIconVisibleInMenu(autoLine);
     if (autoLine)
@@ -271,7 +277,7 @@ void MainWindow::saveFileSlot()
         //读取的文本
         this->saveTextToFile();
     }
-    qDebug() << "Save " << fileName;
+//    qDebug() << "Save " << fileName;
 }
 //保存文件
 void MainWindow::saveTextToFile()
@@ -326,7 +332,7 @@ void MainWindow::openFileSlot()
         fileName = QFileDialog::getOpenFileName(this, tr("打开文件"), QDir::homePath(), tr("c files (*.c);;cpp files (*.cpp);;any files (*.*)"));
         this->readFile();
     }
-    qDebug() << "Open " << fileName;
+//    qDebug() << "Open " << fileName;
 }
 //真正打开文件
 void MainWindow::readFile()
@@ -342,16 +348,14 @@ void MainWindow::readFile()
         if (isOpen)
         {
             editor->clear();
-            QTextStream in(file);
-
-            while (!in.atEnd())
-            {
-                editor->appendPlainText(in.readLine());
-                //光标移动到开始位置
-                editor->moveCursor(QTextCursor::Start);
-            }
-            //已读完
-            fileContent = editor->document()->toPlainText();
+            QByteArray array ;
+                        while(!file->atEnd())//判断是否到文件末尾
+                        {
+                            //读一行
+                            array += file->readLine();
+                        }
+                        editor->appendPlainText(array);
+                        fileContent = editor->document()->toPlainText();
 
             if (fileName.lastIndexOf("\\") != -1)
             {
@@ -475,6 +479,7 @@ void MainWindow::cutSolt()
 void MainWindow::copySolt()
 {
     editor->copy();
+
 }
 //粘贴
 void MainWindow::pasteSolt()
@@ -545,13 +550,13 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *event)
 //状态栏
 void MainWindow::statusBarSlot()
 {
-    statusBar = !statusBar;
-    ui->actionStatusBar->setIconVisibleInMenu(statusBar);
-    ui->statusBar->setVisible(statusBar);
+    // statusBar = !statusBar;
+    // ui->actionStatusBar->setIconVisibleInMenu(statusBar);
+    // ui->statusBar->setVisible(statusBar);
 
-    setting->beginGroup("config"); //beginGroup与下面endGroup 相对应，“config”是标记
-    setting->setValue("status_bar", QVariant(statusBar ? "1" : "0"));
-    setting->endGroup();
+    // setting->beginGroup("config"); //beginGroup与下面endGroup 相对应，“config”是标记
+    // setting->setValue("status_bar", QVariant(statusBar ? "1" : "0"));
+    // setting->endGroup();
 }
 
 //帮助
@@ -745,9 +750,9 @@ void MainWindow::closeEvent(QCloseEvent *event)
 void MainWindow::zoomInSlot()
 {
     zoomInNum++;
-    if (zoomInNum <= 20)
+    if (zoomInNum <= 10)
     {
-        //最大放大次数为20
+        //最大放大次数为10
         editor->zoomIn(2); //参数为2缩放比例正常
     }
 }
@@ -794,13 +799,13 @@ void MainWindow::compileRunSlot()
 {
     compileSlot();
     runSlot();
-    qDebug() << "CompileRun " << fileName;
+//    qDebug() << "CompileRun " << fileName;
 }
 //运行
 void MainWindow::runSlot()
 {
     compileSlot();
-    qDebug() << "Run " << fileName;
+//    qDebug() << "Run " << fileName;
 }
 
 //编译
@@ -822,17 +827,17 @@ void MainWindow::compileSlot()
     }
     p->setArguments(args);
     p->start();
-    qDebug() << "compile";
-    qDebug() << "args: " << args;
+//    qDebug() << "compile";
+//    qDebug() << "args: " << args;
     p->waitForStarted();
     p->waitForFinished();
     p->setProgram(QCoreApplication::applicationDirPath() + "/ConsolePauser.exe");
     args << fileName.mid(0, fileName.lastIndexOf(".")) + ".exe";
     p->setArguments(args);
     p->start();
-    qDebug() << "run";
-    qDebug() << p;
+//    qDebug() << "run";
+//    qDebug() << p;
     p->waitForStarted();
     p->waitForFinished();
-    qDebug() << "Compile " << fileName;
+//    qDebug() << "Compile " << fileName;
 }

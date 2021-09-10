@@ -18,6 +18,12 @@
     <normaloff>:/app.ico</normaloff>:/app.ico</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
+   <property name="font">
+    <font>
+     <family>Arial</family>
+     <pointsize>12</pointsize>
+    </font>
+   </property>
    <layout class="QVBoxLayout" name="verticalLayout">
     <property name="spacing">
      <number>0</number>
@@ -42,7 +48,7 @@
      <x>0</x>
      <y>0</y>
      <width>1038</width>
-     <height>23</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -300,8 +306,7 @@
      <normalon>:/auto_line.png</normalon>:/iamges/auto_line.png</iconset>
    </property>
    <property name="text">
-    <string>
-状态栏(&amp;S)</string>
+    <string>注释</string>
    </property>
   </action>
   <action name="actionHelp">

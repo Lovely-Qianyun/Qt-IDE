@@ -48,19 +48,20 @@ private:
     CodeEditor *editor;
     QKeyEvent *ev;
 private slots:
-    void newFileSolt();                                                                   //新文件槽函数
-    void exitAppSlot();                                                                   //退出软件槽函数
-    void openFileSlot();                                                                  //打开文件槽函数
-    void textChangeSlot();                                                                //文本变化槽函数
-    void saveFileSlot();                                                                  //保存文件槽函数
-    void saveOtherFileSlot();                                                             //另存
-    void editSolt();                                                                      //编辑
-    void undoSolt();                                                                      //撤销
-    void redoSolt();                                                                      //重做
-    void cutSolt();                                                                       //剪切
-    void copySolt();                                                                      //复制
-    void pasteSolt();                                                                     //粘贴
-    void deleteSolt();                                                                    //删除
+    void newFileSolt();       //新文件槽函数
+    void exitAppSlot();       //退出软件槽函数
+    void openFileSlot();      //打开文件槽函数
+    void textChangeSlot();    //文本变化槽函数
+    void saveFileSlot();      //保存文件槽函数
+    void saveOtherFileSlot(); //另存
+    void editSolt();          //编辑
+    void undoSolt();          //撤销
+    void redoSolt();          //重做
+    void cutSolt();           //剪切
+    void copySolt();          //复制
+    void pasteSolt();         //粘贴
+    void deleteSolt();        //删除
+    void Insertbrackets();
     void selectAllSlot();                                                                 //全选
     void findSlot();                                                                      //查找
     void find(QString value, bool isChecked, bool isUp);                                  //查找
@@ -91,13 +92,14 @@ private:
     int zoomInNum = 0;  //缩放参数
     QSettings *setting; //配置文件
 
-    void saveTextToFile();                  //保存文本到文件
-    void readFile();                        //读取文件
-    void showMessage(QString);              //显示提示消息
-    void init();                            //初始化一下参数
-    void conn();                            //关联信号和槽
-    void setShortcut();                     //设置快捷键
-    void closeEvent(QCloseEvent *event);    //关闭事件
-    void keyReleaseEvent(QKeyEvent *event); //括号补全
+    void saveTextToFile();                      //保存文本到文件
+    void readFile();                            //读取文件
+    void showMessage(QString);                  //显示提示消息
+    void init();                                //初始化一下参数
+    void conn();                                //关联信号和槽
+    void setShortcut();                         //设置快捷键
+    void closeEvent(QCloseEvent *event);        //关闭事件
+    void keyReleaseEvent(QKeyEvent *event);     //括号补全
+    void mouseReleaseEvent(QMouseEvent *event); //智能括号
 };
 #endif // MAINWINDOW_H

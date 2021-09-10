@@ -8,7 +8,7 @@ Highlighter::Highlighter(QTextDocument *parent)
 {
     HighlightingRule rule;
 
-    keywordFormat.setForeground(Qt::darkBlue);
+    keywordFormat.setForeground(QColor("#0286E3"));
     keywordFormat.setFontWeight(QFont::Bold);
     const QString keywordPatterns[] = {
         QStringLiteral("\\bchar\\b"), QStringLiteral("\\bclass\\b"), QStringLiteral("\\bconst\\b"),
@@ -34,23 +34,28 @@ Highlighter::Highlighter(QTextDocument *parent)
     rule.format = classFormat;
     highlightingRules.append(rule);
 
-    singleLineCommentFormat.setForeground(Qt::red);
+    singleLineCommentFormat.setForeground(QColor("#05A310"));
     rule.pattern = QRegularExpression(QStringLiteral("//[^\n]*"));
     rule.format = singleLineCommentFormat;
     highlightingRules.append(rule);
 
-    multiLineCommentFormat.setForeground(Qt::red);
+    multiLineCommentFormat.setForeground(QColor("#05A310"));
 
-    quotationFormat.setForeground(Qt::darkGreen);
+    quotationFormat.setForeground(QColor("#05A310"));
     rule.pattern = QRegularExpression(QStringLiteral("\".*\""));
     rule.format = quotationFormat;
     highlightingRules.append(rule);
 
+    incde.setForeground(QColor("#05A310"));
+    rule.pattern=QRegularExpression(QStringLiteral("#include.*"));
+    highlightingRules.append(rule);
+
     functionFormat.setFontItalic(true);
-    functionFormat.setForeground(Qt::blue);
+    functionFormat.setForeground(QColor("#C867D6"));
     rule.pattern = QRegularExpression(QStringLiteral("\\b[A-Za-z0-9]+(?=\\()"));
     rule.format = functionFormat;
     highlightingRules.append(rule);
+
 
     commentStartExpression = QRegularExpression(QStringLiteral("/\\*"));
     commentEndExpression = QRegularExpression(QStringLiteral("\\*/"));
@@ -63,7 +68,7 @@ void Highlighter::highlightBlock(const QString &text)
         while (matchIterator.hasNext()) {
             QRegularExpressionMatch match = matchIterator.next();
             QString tmp = match.captured();
-            qDebug()<<tmp<<rule.pattern;
+//            qDebug()<<tmp<<rule.pattern;
             setFormat(match.capturedStart(), match.capturedLength(), rule.format);
         }
     }
