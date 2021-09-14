@@ -27,13 +27,11 @@
 #include <QDebug>
 #include <color.h>
 
-namespace Ui
-{
+namespace Ui {
     class MainWindow;
 }
 
-class MainWindow : public QMainWindow
-{
+class MainWindow : public QMainWindow {
     Q_OBJECT
 
 public:
@@ -75,7 +73,7 @@ private slots:
     void statusBarSlot();                                                                 //状态栏
     void helpSlot();                                                                      //帮助
     //连接编译器相关
-    void precompileSlot(); //预编译
+//    void precompileSlot(); //预编译
     void compileRunSlot(); //编译运行
     void runSlot();        //运行
     void compileSlot();    //编译

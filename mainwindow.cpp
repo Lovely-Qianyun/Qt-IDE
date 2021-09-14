@@ -3,7 +3,9 @@
 #include "ui_mainwindow.h"
 #include <QProcess>
 #include <stdlib.h>
+#include <QFile>
 #include <QTextDocument>
+#include <windows.h>
 #include <color.h>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
@@ -239,7 +241,6 @@ void MainWindow::saveFileSlot() {
         //读取的文本
         this->saveTextToFile();
     }
-//    qDebug() << "Save " << fileName;
 }
 //保存文件
 void MainWindow::saveTextToFile() {
@@ -283,7 +284,6 @@ void MainWindow::openFileSlot() {
         fileName = QFileDialog::getOpenFileName(this, tr("打开文件"), QDir::homePath(), tr("c files (*.c);;cpp files (*.cpp);;any files (*.*)"));
         this->readFile();
     }
-//    qDebug() << "Open " << fileName;
 }
 //真正打开文件
 void MainWindow::readFile() {
@@ -620,45 +620,46 @@ void MainWindow::zoomOutSlot() {
 
 //连接编译器相关
 //预编译
-void MainWindow::precompileSlot() {
-    FILE *p = fopen(fileName.toStdString().data(), "r");
-    if (p == NULL) {
-        return;
-    }
-    QString cmd = fileName;
-    FILE *p1 = fopen(cmd.toStdString().data(), "w");
-    if (p1 == NULL) {
-        return;
-    }
-    QString str;
-    while (!feof(p)) {
-        char buf[1024] = {0};
-        fgets(buf, sizeof(buf), p);
-        str += buf;
-    }
-    fputs(str.toStdString().data(), p1);
-    fclose(p);
-    fclose(p1);
-}
+//void MainWindow::precompileSlot() {
+//    FILE *p = fopen(fileName.toStdString().data(), "r");
+//    if (p == NULL) {
+//        return;
+//    }
+//    QString cmd = fileName;
+//    FILE *p1 = fopen(cmd.toStdString().data(), "w");
+//    if (p1 == NULL) {
+//        return;
+//    }
+//    QString str;
+//    while (!feof(p)) {
+//        char buf[1024] = {0};
+//        fgets(buf, sizeof(buf), p);
+//        str += buf;
+//    }
+//    fputs(str.toStdString().data(), p1);
+//    fclose(p);
+//    fclose(p1);
+//}
 
 //编译运行
 void MainWindow::compileRunSlot() {
     compileSlot();
     runSlot();
-//    qDebug() << "CompileRun " << fileName;
 }
 //运行
 void MainWindow::runSlot() {
-//    qDebug() << "Run " << fileName;
+    QFile file(fileName.mid(0, fileName.indexOf(".")) + ".exe");
+    if(file.exists()) {
+        system(QString(QCoreApplication::applicationDirPath() + "//ConsolePauser.exe" + " " + fileName.mid(0, fileName.indexOf(".")) + ".exe").toStdString().c_str());
+    } else {
+        compileSlot();
+    }
 }
 
 //编译
 void MainWindow::compileSlot() {
     saveFileSlot();
-    qDebug() << QCoreApplication::applicationDirPath() << fileName;
-    QProcess *p = new QProcess;
-    QStringList args;
-    args << "/c" << QCoreApplication::applicationDirPath() + "/mingw64/bin/gcc.exe"
-         << "-o " << fileName.mid(0, fileName.lastIndexOf(".")) + ".exe" << fileName;
-    p->startDetached("cmd.exe ", args);
+    if (fileName.endsWith("cpp")) {
+        system(QString(QCoreApplication::applicationDirPath() + "//mingw64//bin//g++.exe" + " " + fileName + " -o " + fileName.mid(0, fileName.indexOf(".")) + ".exe").toStdString().c_str());
+    }
 }
