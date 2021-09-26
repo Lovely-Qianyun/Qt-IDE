@@ -7,6 +7,9 @@
 #include <QTextDocument>
 #include <windows.h>
 #include <color.h>
+#include<QErrorMessage>
+#include<QFile>
+#include <QShortcut>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     ui(new Ui::MainWindow) {
@@ -21,6 +24,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     this->conn(); //连接信号与槽
 
     this->setShortcut(); //设置快捷键
+
+    QShortcut *sh = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_G), editor);
+    connect(sh, SIGNAL(activated()), this, SLOT(foldall()));
+
+    QShortcut *sh1 = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_L), editor);
+    connect(sh1, SIGNAL(activated()), this, SLOT(unfold()));
 
     //是否传入了文件路径
     QStringList arguments = QCoreApplication::arguments();
@@ -113,6 +122,7 @@ void MainWindow::conn() {
     connect(ui->actionHelp, SIGNAL(triggered()), this, SLOT(helpSlot()));
 
     //工具栏
+    connect(ui->actionFont, SIGNAL(triggered()), this, SLOT(fontChooseSlot()));
 
     // 编译运行
     connect(ui->actionCompile, SIGNAL(triggered()), this, SLOT(compileSlot()));
@@ -142,6 +152,110 @@ void MainWindow::setShortcut() {
     ui->actionCompile->setShortcut(QKeySequence(Qt::Key_F9));
     ui->actionRun->setShortcut(QKeySequence(Qt::Key_F10));
     ui->actionCompileRun->setShortcut(QKeySequence(Qt::Key_F11));
+}
+
+bool MainWindow::unfold() {
+    qDebug() << "unfold...";
+    editor->textCursor().beginEditBlock();
+    QTextDocument *doc = editor->document();
+    QTextCursor cursor = QTextCursor(doc);
+    QRegExp *pattern = new QRegExp("//.*");
+    while (true) {
+        cursor = doc->find(*pattern, cursor);
+        if (cursor.isNull()) {
+            break;
+        }
+        qDebug() << cursor.selectedText() << cursor.blockNumber();
+        cursor.block().setVisible(true);
+    }
+    editor->textCursor().endEditBlock();
+    editor->viewport()->update();
+    editor->document()->adjustSize();
+
+    editor->textCursor().beginEditBlock();
+    cursor = QTextCursor(doc);
+    QRegExp *pattern1 = new QRegExp("/\\*");
+    QRegExp *pattern2 = new QRegExp("\\*/");
+    int start, end;
+    QTextCursor s, e;
+
+    s = doc->find(*pattern1);
+    start = s.position();
+    e = doc->find(*pattern2, start);
+    end = e.position();
+
+    cursor = QTextCursor(doc);
+    while (start >= 0 && start < end) {
+        if (end <= start) {
+            break;
+        }
+        for (int i = s.blockNumber(); i <= e.blockNumber(); i++) {
+            QTextBlock tb = doc->findBlockByNumber(i);
+            qDebug() << tb.text() << i;
+            tb.setVisible(true);
+        }
+        s = doc->find(*pattern1, end);
+        start = s.position();
+        e = doc->find(*pattern2, start);
+        end = e.position();
+        qDebug() << start << end;
+        qDebug() << cursor.selectedText() << cursor.blockNumber();
+    }
+    editor->textCursor().endEditBlock();
+    editor->viewport()->update();
+    editor->document()->adjustSize();
+}
+
+void MainWindow::foldall() {
+    qDebug() << "fold...";
+    editor->textCursor().beginEditBlock();
+    QTextDocument *doc = editor->document();
+    QTextCursor cursor = QTextCursor(doc);
+    QRegExp *pattern = new QRegExp("//.*");
+    while (true) {
+        cursor = doc->find(*pattern, cursor);
+        if (cursor.isNull()) {
+            break;
+        }
+        qDebug() << cursor.selectedText() << cursor.blockNumber();
+        cursor.block().setVisible(false);
+    }
+    editor->textCursor().endEditBlock();
+    editor->viewport()->update();
+    editor->document()->adjustSize();
+
+    editor->textCursor().beginEditBlock();
+    cursor = QTextCursor(doc);
+    QRegExp *pattern1 = new QRegExp("/\\*");
+    QRegExp *pattern2 = new QRegExp("\\*/");
+    int start, end;
+    QTextCursor s, e;
+
+    s = doc->find(*pattern1);
+    start = s.position();
+    e = doc->find(*pattern2, start);
+    end = e.position();
+
+    cursor = QTextCursor(doc);
+    while (start >= 0 && start < end) {
+        if (end <= start) {
+            break;
+        }
+        for (int i = s.blockNumber(); i <= e.blockNumber(); i++) {
+            QTextBlock tb = doc->findBlockByNumber(i);
+            qDebug() << tb.text();
+            tb.setVisible(false);
+        }
+        s = doc->find(*pattern1, end);
+        start = s.position();
+        e = doc->find(*pattern2, start);
+        end = e.position();
+        qDebug() << start << end;
+        qDebug() << cursor.selectedText() << cursor.blockNumber();
+    }
+    editor->textCursor().endEditBlock();
+    editor->viewport()->update();
+    editor->document()->adjustSize();
 }
 
 //新建文件槽函数
@@ -296,8 +410,9 @@ void MainWindow::readFile() {
         bool isOpen = file->open(QIODevice::ReadOnly);
         if (isOpen) {
             editor->clear();
-            QByteArray array ;
-            while(!file->atEnd()) { //判断是否到文件末尾
+            QByteArray array;
+            while (!file->atEnd()) {
+                //判断是否到文件末尾
                 //读一行
                 array += file->readLine();
             }
@@ -396,7 +511,6 @@ void MainWindow::cutSolt() {
 //复制
 void MainWindow::copySolt() {
     editor->copy();
-
 }
 //粘贴
 void MainWindow::pasteSolt() {
@@ -408,6 +522,23 @@ void MainWindow::deleteSolt() {
     if (cursor.hasSelection()) {
         cursor.deleteChar();
         editor->reInit();
+    }
+}
+
+void MainWindow::fontChooseSlot() {
+    QFont textFont = editor->font();
+    bool ok;
+    QFont font = QFontDialog::getFont(&ok, textFont, this, tr("字体选择"));
+    if (ok) {
+        editor->setFont(font);
+        setting->beginGroup("config"); //beginGroup与下面endGroup 相对应，“config”是标记
+        setting->setValue("family", QVariant(font.family()));
+        setting->setValue("point_size", QVariant(font.pointSize()));
+        setting->setValue("italic", QVariant(font.italic() == true ? "1" : "0"));
+        setting->setValue("bold", QVariant(font.bold() == true ? "1" : "0"));
+        setting->setValue("overline", QVariant(font.overline() == true ? "1" : "0"));
+        setting->setValue("underline", QVariant(font.underline() == true ? "1" : "0"));
+        setting->endGroup();
     }
 }
 //插入括号
@@ -540,10 +671,17 @@ void MainWindow::doReplaceSlot(QString target, QString value, bool isChecked, bo
     editor->setPalette(palette);
     //替换
     if (isReplaceAll) {
-        if (!editor->textCursor().atEnd()) {
-            replace(value, isChecked);
-            doReplaceSlot(target, value, isChecked, isReplaceAll);
+        editor->textCursor().beginEditBlock();
+        QTextDocument *doc = editor->document();
+        QTextCursor cursor = QTextCursor(doc);
+        while (true) {
+            cursor = doc->find(target, cursor);
+            if (cursor.isNull()) {
+                break;
+            }
+            cursor.insertText(value);
         }
+        editor->textCursor().endEditBlock();
     } else {
         replace(value, isChecked);
     }
@@ -648,18 +786,35 @@ void MainWindow::compileRunSlot() {
 }
 //运行
 void MainWindow::runSlot() {
-    QFile file(fileName.mid(0, fileName.indexOf(".")) + ".exe");
-    if(file.exists()) {
-        system(QString(QCoreApplication::applicationDirPath() + "//ConsolePauser.exe" + " " + fileName.mid(0, fileName.indexOf(".")) + ".exe").toStdString().c_str());
+    if (system(QString(QCoreApplication::applicationDirPath() + "/mingw64/bin/g++.exe" + " " + fileName + " -o " + fileName.mid(0, fileName.indexOf(".")) + ".exe").toStdString().c_str()) == 0) {
+        QFile file(fileName.mid(0, fileName.indexOf(".")) + ".exe");
+        if (file.exists()) {
+            system(QString(QCoreApplication::applicationDirPath() + "/ConsolePauser.exe" + " " + fileName.mid(0, fileName.indexOf(".")) + ".exe").toStdString().c_str());
+        } else {
+            compileSlot();
+        }
     } else {
-        compileSlot();
+        QErrorMessage *msg = new QErrorMessage(this);
+        msg->showMessage("请先正确编译！");
+        msg->show();
     }
 }
 
 //编译
 void MainWindow::compileSlot() {
     saveFileSlot();
-    if (fileName.endsWith("cpp")) {
-        system(QString(QCoreApplication::applicationDirPath() + "//mingw64//bin//g++.exe" + " " + fileName + " -o " + fileName.mid(0, fileName.indexOf(".")) + ".exe").toStdString().c_str());
+    if (system(QString(QCoreApplication::applicationDirPath() + "/mingw64/bin/g++.exe" + " " + fileName + " -o " + fileName.mid(0, fileName.indexOf(".")) + ".exe").toStdString().c_str()) == 1) {
+        system(QString(QCoreApplication::applicationDirPath() + "/mingw64/bin/g++.exe" + " " + fileName + " -o " + fileName.mid(0, fileName.indexOf(".")) + ".exe" + " 2> " + QCoreApplication::applicationDirPath() + "/compileres.txt").toStdString().c_str());
+        QFile f(QCoreApplication::applicationDirPath() + "/compileres.txt");
+        f.open(QIODevice::ReadWrite | QIODevice::Text);
+        QByteArray t = f.readAll();
+        QErrorMessage *msg = new QErrorMessage(this);
+        QString s = QString(t).replace("\n", "\n<br>\n");
+        s.replace("\n", "\010"); //?
+        msg->showMessage(s);
+        msg->setMinimumSize(800, 400);
+        msg->show();
+    } else {
+        ;
     }
 }

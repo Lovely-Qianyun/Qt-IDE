@@ -46,6 +46,8 @@ private:
     CodeEditor *editor;
     QKeyEvent *ev;
 private slots:
+    void foldall();
+    bool unfold();
     void newFileSolt();       //新文件槽函数
     void exitAppSlot();       //退出软件槽函数
     void openFileSlot();      //打开文件槽函数
@@ -60,6 +62,7 @@ private slots:
     void pasteSolt();         //粘贴
     void deleteSolt();        //删除
     void Insertbrackets();
+    void fontChooseSlot();
     void selectAllSlot();                                                                 //全选
     void findSlot();                                                                      //查找
     void find(QString value, bool isChecked, bool isUp);                                  //查找
